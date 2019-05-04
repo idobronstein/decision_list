@@ -6,7 +6,6 @@ import pickle
 import random
 import os
 from shutil import copyfile
-
 import numpy as np
 
 shift_label = lambda x: 1 if x == POSITIVE else 0
@@ -18,8 +17,8 @@ def run_once(train_set_size, test_set_size, result_path, layer_size):
 	os.makedirs(dir_path)
 
 	# Load all data
-	train_set = pickle.load(open(r"D:\checkouts\decision_lists\results\2019-05-03_21-09-46\train_set.pkl", 'rb'))
-	test_set = pickle.load(open(r"D:\checkouts\decision_lists\results\2019-05-03_21-09-46\test_set.pkl", 'rb'))
+	train_set = pickle.load(open(os.path.join(os.path.join(result_path, '..'), TRAIN_SET_FILE_NAME), 'rb'))
+	test_set = pickle.load(open(os.path.join(os.path.join(result_path, '..'), TEST_SET_FILE_NAME), 'rb'))
 	
 	# set layer size
 
