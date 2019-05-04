@@ -7,20 +7,19 @@ import random
 import os
 from shutil import copyfile
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 shift_label = lambda x: 1 if x == POSITIVE else 0
 
-def run_once(train_set_size, test_set_size, result_path):
+def run_once(train_set_size, test_set_size, result_path, layer_size):
 	# create working dir
 	run_title = 'DNN_N={0}_K={1}_D={2}'.format(N, K, D, train_set_size, test_set_size)
 	dir_path = os.path.join(result_path, run_title)
 	os.makedirs(dir_path)
 
 	# Load all data
-	train_set = pickle.load(open(os.path.join(result_path, TRAIN_SET_FILE_NAME), 'rb'))
-	test_set = pickle.load(open(os.path.join(os.path.join(result_path, '..'), TEST_SET_FILE_NAME), 'rb'))
+	train_set = pickle.load(open(r"D:\checkouts\decision_lists\results\2019-05-03_21-09-46\train_set.pkl", 'rb'))
+	test_set = pickle.load(open(r"D:\checkouts\decision_lists\results\2019-05-03_21-09-46\test_set.pkl", 'rb'))
 	
 	# set layer size
 
@@ -29,9 +28,9 @@ def run_once(train_set_size, test_set_size, result_path):
 		global_step = tf.Variable(0, trainable=False, name='global_step')
 		X = tf.placeholder(tf.float32, name='X', shape=[BATCH_SIZE_DNN, N])
 		Y = tf.placeholder(tf.float32, name='Y', shape=[BATCH_SIZE_DNN])
-		W_1 = tf.get_variable('W_1', shape=[N, LAYER_SIZE], initializer=tf.contrib.layers.xavier_initializer())
-		B_1 = tf.get_variable('B_1', shape=[LAYER_SIZE], initializer=tf.zeros_initializer())
-		W_2 = tf.get_variable('W_2', shape=[LAYER_SIZE], initializer=tf.contrib.layers.xavier_initializer())
+		W_1 = tf.get_variable('W_1', shape=[N, layer_size], initializer=tf.contrib.layers.xavier_initializer())
+		B_1 = tf.get_variable('B_1', shape=[layer_size], initializer=tf.zeros_initializer())
+		W_2 = tf.get_variable('W_2', shape=[layer_size], initializer=tf.contrib.layers.xavier_initializer())
 		B_2 = tf.get_variable('B_2', shape=[1], initializer=tf.zeros_initializer())
 		
 		out_1 = tf.nn.relu(tf.matmul(X, W_1) + B_1)
@@ -70,10 +69,6 @@ def run_once(train_set_size, test_set_size, result_path):
 				_, train_loss, train_acc, val_W_1,  val_B_1, val_W_2, val_B_2 = sess.run([train_op, loss, accuracy, W_1,  B_1, W_2, B_2], {X:x, Y:y})
 				if step % DISPLAY == 0:
 					print('step: {0}, loss: {1}, accuracy: {2}'.format(step, train_loss, train_acc))
-					#print(val_W_1)
-					#print(val_B_1)
-					#print(val_W_2)
-					#print(val_B_2)
 				if step % TEST == 0:
 					# test Train set
 					X_steps.append(step)
@@ -108,11 +103,10 @@ def run_once(train_set_size, test_set_size, result_path):
 					final_test_loss = avg_loss
 					final_test_accuracy = avg_accuracy
 
-	plt.title(run_title)
-	plt.plot(X_steps, Y_train, 'ro')
-	plt.plot(X_steps, Y_test, 'bo')
-	plt.savefig(os.path.join(dir_path, run_title + '.png'))
-	plt.clf()
+	pickle.dump(val_W_1, open(os.path.join(dir_path, 'W_1.pkl'), 'wb'))
+	pickle.dump(val_B_1, open(os.path.join(dir_path, 'B_1.pkl'), 'wb'))
+	pickle.dump(val_W_2, open(os.path.join(dir_path, 'W_2.pkl'), 'wb'))
+	pickle.dump(val_B_2, open(os.path.join(dir_path, 'B_2.pkl'), 'wb'))
 	
 	return final_train_accuracy, final_test_accuracy	
 

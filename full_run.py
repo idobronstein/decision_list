@@ -11,7 +11,6 @@ import pickle
 import os
 import numpy as np
 import random
-import matplotlib.pyplot as plt
 
 def generate_sampels(decision_list, size, name, result_path, p_positive):
 	print("Generating: {0} sampels ".format(size))
@@ -75,12 +74,12 @@ def run():
 	decision_list = create_DNF()
 	#decision_list = CNF(N, 3, D, exact_size=True)
 	print(decision_list)
-	pickle.dump(decision_list, open(os.path.join(result_path, DECISIONLIST_FILE_NAME), 'wb'))
+	#pickle.dump(decision_list, open(os.path.join(result_path, DECISIONLIST_FILE_NAME), 'wb'))
+	'''
 	all_CNF3_train_accuracy = []
 	all_CNF3_test_accuracy = []	
 	all_DNN_train_accuracy = []
 	all_DNN_test_accuracy = []
-	'''
 	all_classic_train_accuracy = []
 	all_classic_test_accuracy = []
 	all_randomforest_train_accuracy = []
@@ -90,9 +89,23 @@ def run():
 	all_DLNN_train_accuracy = []
 	all_DLNN_test_accuracy = []
 	'''
-	
+	results =[]
 	test_set_size = generate_all_sampels(decision_list, TEST_SET_FILE_NAME, result_path)
-	#generate_sampels(decision_list, TEST_SET_SIZE, TEST_SET_FILE_NAME, result_path, P_POSITIVE)
+	generate_sampels(decision_list, TRAIN_SET_SIZE, TRAIN_SET_FILE_NAME, result_path, P_POSITIVE)
+
+	for layer_size in ALL_LAYER_SIZE:
+		result_run_path = os.path.join(result_path, 'layer_size={0}'.format(layer_size))
+		os.makedirs(result_run_path)
+
+		print("Running DNN with layer size :{0}".format(layer_size))
+		DNN_train_accuracy , DNN_test_accuracy = DNN.run_once(TRAIN_SET_SIZE, test_set_size ,result_run_path, layer_size)
+		print("DNN got on train set: accuracy={}".format(DNN_train_accuracy))
+		print("DNN got on test set: accuracy={}".format(DNN_test_accuracy))
+		results.append(DNN_test_accuracy)
+
+	pickle.dump(results, open(os.path.join(result_path, 'layer_size_check_results.pkl'), 'wb'))
+
+	'''
 	for train_set_size in ALL_TRAIN_SET_SIZE:
 		result_run_path = os.path.join(result_path, 'trainSetSize={0},p_positive={1}'.format(train_set_size, P_POSITIVE))
 		os.makedirs(result_run_path)
@@ -114,7 +127,6 @@ def run():
 		all_DNN_train_accuracy.append(DNN_train_accuracy)
 		all_DNN_test_accuracy.append(DNN_test_accuracy)
 
-		'''
 		print("==============================================================================================")
 		print("Running classic algorithem....")
 		classic_train_accuracy , classic_test_accuracy = classic.run_once(train_set_size, test_set_size, result_run_path)
@@ -146,33 +158,8 @@ def run():
 		print("gradientboosting got on test set: accuracy={}".format(gradientboosting_test_accuracy))
 		all_gradientboosting_train_accuracy.append(gradientboosting_train_accuracy)
 		all_gradientboosting_test_accuracy.append(gradientboosting_test_accuracy)
-		'''
-
-	plt.title('train accuracy graph')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_CNF3_train_accuracy, 'mo')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_DNN_train_accuracy, 'ko')
-	'''
-	plt.plot(ALL_TRAIN_SET_SIZE, all_classic_train_accuracy, 'bo')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_DLNN_train_accuracy, 'ro')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_randomforest_train_accuracy, 'go')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_gradientboosting_train_accuracy, 'yo')
-	'''
-	plt.savefig(os.path.join(result_path, 'train_graph.png'))
-	plt.clf()
-
-	plt.title('test accuracy graph')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_CNF3_test_accuracy, 'mo')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_DNN_test_accuracy, 'ko')
-	'''
-	plt.plot(ALL_TRAIN_SET_SIZE, all_classic_test_accuracy, 'bo')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_randomforest_test_accuracy, 'go')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_gradientboosting_test_accuracy, 'yo')
-	plt.plot(ALL_TRAIN_SET_SIZE, all_DLNN_test_accuracy, 'ro')
-	'''
-	plt.savefig(os.path.join(result_path, 'test_graph.png'))
-	plt.clf()
 	
-	'''
+	
 	pickle.dump(all_classic_train_accuracy, open(os.path.join(result_path, 'classic_test_result.pkl'), 'wb'))
 	pickle.dump(all_DNN_test_accuracy, open(os.path.join(result_path, 'DNN_test_result.pkl'), 'wb'))
 	pickle.dump(all_randomforest_train_accuracy, open(os.path.join(result_path, 'randomforest_test_result.pkl'), 'wb'))

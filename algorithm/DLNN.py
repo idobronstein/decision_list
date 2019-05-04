@@ -5,8 +5,6 @@ import tensorflow as tf
 import pickle 
 import random
 import os
-
-import matplotlib.pyplot as plt
 import numpy as np
 
 def run_once(train_set_size, test_set_size, result_path):
@@ -48,7 +46,7 @@ def run_once(train_set_size, test_set_size, result_path):
 		# calc accuracy
 		prediction = tf.sign(logits)
 		ones = tf.constant(np.ones([BATCH_SIZE_DLNN]), dtype=tf.float32)
-		zeros = tf.constant(-1 * np.ones([BATCH_SIZE_DLNN]), dtype=tf.float32)
+		zeros = tf.constant(np.zeros([BATCH_SIZE_DLNN]), dtype=tf.float32)
 		correct = tf.where(tf.equal(prediction, Y), ones, zeros)
 		accuracy = tf.reduce_mean(correct)
 	
@@ -109,12 +107,6 @@ def run_once(train_set_size, test_set_size, result_path):
 					print("Test loss: {0}, Test accuracy: {1}".format(avg_loss, avg_accuracy))
 					final_test_loss = avg_loss
 					final_test_accuracy = avg_accuracy
-
-	plt.title(run_title)
-	plt.plot(X_steps, Y_train, 'ro')
-	plt.plot(X_steps, Y_test, 'bo')
-	plt.savefig(os.path.join(dir_path, run_title + '.png'))
-	plt.clf()
 
 	pickle.dump(W_val, open(os.path.join(dir_path, W_FILE_NAME), 'wb'))
 	pickle.dump(V_val, open(os.path.join(dir_path, V_FILE_NAME), 'wb'))
